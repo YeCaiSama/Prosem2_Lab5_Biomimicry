@@ -1,0 +1,604 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#d8f1e8">
+  <title>Little Bird — Fly by Nature</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: "Trebuchet MS", "Avenir Next", sans-serif;
+      color: #173d3a;
+      background: #d8f1e8;
+      font-synthesis: none;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-width: 320px;
+      min-height: 100vh;
+      margin: 0;
+      padding: 28px 18px 36px;
+      background:
+        radial-gradient(ellipse at 12% 8%, #fff8df 0, transparent 34%),
+        linear-gradient(160deg, #d8f1e8, #b9e1d7);
+    }
+
+    main { width: min(1050px, 100%); margin: 0 auto; }
+
+    .masthead {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 18px;
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      color: #4a8173;
+      font-size: 0.75rem;
+      font-weight: 800;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-family: Georgia, serif;
+      font-size: clamp(2.4rem, 7vw, 4.7rem);
+      font-weight: 500;
+      letter-spacing: -0.07em;
+      line-height: 0.95;
+    }
+
+    .intro {
+      max-width: 340px;
+      margin: 0;
+      color: #426d65;
+      font-size: 0.96rem;
+      line-height: 1.55;
+    }
+
+    .game-card {
+      overflow: hidden;
+      border: 1px solid rgba(37, 91, 77, 0.16);
+      border-radius: 22px;
+      background: #fffdf5;
+      box-shadow: 0 22px 60px rgba(34, 91, 77, 0.14);
+    }
+
+    .game-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 14px 20px;
+    }
+
+    .score-label {
+      color: #64877d;
+      font-size: 0.7rem;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    #score {
+      margin-left: 8px;
+      color: #173d3a;
+      font-size: 1.35rem;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .prediction {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      color: #638076;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    .pulse {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #9ab8ad;
+    }
+
+    .prediction.is-fly .pulse {
+      background: #ed8e52;
+      box-shadow: 0 0 0 5px rgba(237, 142, 82, 0.16);
+    }
+
+    .canvas-wrap { position: relative; background: #b7e5df; }
+
+    canvas#game {
+      display: block;
+      width: 100%;
+      height: auto;
+      aspect-ratio: 900 / 520;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 16px 20px 19px;
+    }
+
+    #message {
+      min-height: 1.4em;
+      margin: 0;
+      color: #55766c;
+      font-size: 0.88rem;
+      line-height: 1.45;
+    }
+
+    button {
+      flex: 0 0 auto;
+      min-height: 45px;
+      padding: 0 20px;
+      border: 0;
+      border-radius: 999px;
+      color: #fffdf5;
+      background: #245c50;
+      font: inherit;
+      font-size: 0.88rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 140ms ease, background 140ms ease;
+    }
+
+    button:hover { transform: translateY(-2px); background: #19483f; }
+    button:focus-visible { outline: 3px solid #ed8e52; outline-offset: 3px; }
+    button:disabled { cursor: wait; opacity: 0.7; transform: none; }
+
+    .below {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 240px;
+      gap: 18px;
+      margin-top: 18px;
+    }
+
+    .nature-note, .camera-card {
+      border: 1px solid rgba(37, 91, 77, 0.14);
+      border-radius: 16px;
+      background: rgba(255, 253, 245, 0.72);
+    }
+
+    .nature-note { padding: 17px 19px; }
+    .nature-note h2 { margin: 0 0 6px; font-family: Georgia, serif; font-size: 1.1rem; }
+    .nature-note p { margin: 0; color: #55766c; font-size: 0.84rem; line-height: 1.5; }
+
+    .camera-card { overflow: hidden; padding: 10px; }
+    .camera-heading {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      margin: 0 0 7px;
+      color: #64877d;
+      font-size: 0.65rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    #camera-preview {
+      display: grid;
+      min-height: 100px;
+      place-items: center;
+      overflow: hidden;
+      border-radius: 9px;
+      color: #77968c;
+      background: #dcece3;
+      font-size: 0.75rem;
+    }
+
+    #camera-preview canvas { display: block; width: 100%; height: auto; }
+    #camera-preview video { display: none; }
+
+    .hint {
+      margin: 15px 3px 0;
+      color: #64877d;
+      font-size: 0.76rem;
+      text-align: center;
+    }
+
+    @media (max-width: 650px) {
+      body { padding: 22px 12px 28px; }
+      .masthead { align-items: start; flex-direction: column; gap: 10px; }
+      .intro { max-width: 520px; }
+      .below { grid-template-columns: 1fr; }
+      .camera-card { display: grid; grid-template-columns: auto minmax(100px, 180px); align-items: center; gap: 10px; }
+      .camera-heading { margin: 0; }
+      #camera-preview { min-height: 0; }
+      .controls { align-items: start; flex-direction: column; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header class="masthead">
+      <div>
+        <p class="eyebrow">A tiny experiment in biomimicry</p>
+        <h1>Little Bird</h1>
+      </div>
+      <p class="intro">Can your camera teach a little bird to fly? Show your model its <strong>Fly</strong> pose to lift off, and relax back to <strong>Default</strong> to glide.</p>
+    </header>
+
+    <section class="game-card" aria-label="Little Bird game">
+      <div class="game-topbar">
+        <div><span class="score-label">Seeds collected</span><span id="score">0</span></div>
+        <div class="prediction" id="prediction" aria-live="polite">
+          <span class="pulse" aria-hidden="true"></span>
+          <span id="prediction-label">MODEL OFFLINE</span>
+          <span id="confidence">--</span>
+        </div>
+      </div>
+      <div class="canvas-wrap">
+        <canvas id="game" width="900" height="520" aria-label="A bird flying between leafy branches"></canvas>
+      </div>
+      <div class="controls">
+        <p id="message" role="status">Start the camera to begin. Your Fly pose will make the bird flap.</p>
+        <button id="start-button" type="button">Start camera &amp; play</button>
+      </div>
+    </section>
+
+    <section class="below" aria-label="How the interaction works">
+      <article class="nature-note">
+        <h2>Borrowed from birds</h2>
+        <p>Birds use wingbeats to gain lift, then glide when they stop flapping. Here, a confident <strong>Fly</strong> prediction triggers a wingbeat; <strong>Default</strong> means no input, so gravity takes over. Weave through the branches and collect seeds.</p>
+      </article>
+      <aside class="camera-card">
+        <p class="camera-heading"><span>Camera preview</span><span>On-device model</span></p>
+        <div id="camera-preview">Camera turns on when you start</div>
+      </aside>
+    </section>
+    <p class="hint">Tip: keep your Fly pose in frame. Camera access works on localhost or an HTTPS site.</p>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.7.4/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
+  <script>
+    const MODEL_URL = "./tm-my-image-model/";
+    const FLY_THRESHOLD = 0.78;
+    const FLAP_INTERVAL = 560;
+
+    const canvas = document.getElementById("game");
+    const ctx = canvas.getContext("2d");
+    const scoreElement = document.getElementById("score");
+    const messageElement = document.getElementById("message");
+    const startButton = document.getElementById("start-button");
+    const predictionPanel = document.getElementById("prediction");
+    const predictionLabel = document.getElementById("prediction-label");
+    const confidenceElement = document.getElementById("confidence");
+    const cameraPreview = document.getElementById("camera-preview");
+
+    const width = canvas.width;
+    const height = canvas.height;
+    const groundY = 480;
+    const bird = { x: 190, y: 245, velocity: 0, radius: 16 };
+    let model;
+    let webcam;
+    let gameState = "ready";
+    let pipes = [];
+    let seeds = [];
+    let score = 0;
+    let lastFrame = 0;
+    let lastPrediction = null;
+    let lastFlap = 0;
+    let predictionRunning = false;
+    let animationStarted = false;
+
+    function resetGame() {
+      bird.y = 245;
+      bird.velocity = 0;
+      pipes = [];
+      seeds = [];
+      score = 0;
+      scoreElement.textContent = "0";
+      addPipe(width + 80);
+    }
+
+    function addPipe(x) {
+      const gap = 174;
+      const gapY = 170 + Math.random() * 155;
+      pipes.push({ x, gapY, gap, scored: false });
+      seeds.push({ x: x + 36, y: gapY, collected: false, phase: Math.random() * Math.PI * 2 });
+    }
+
+    function flap(now) {
+      bird.velocity = -5.7;
+      lastFlap = now;
+    }
+
+    function handlePrediction(predictions) {
+      const fly = predictions.find((item) => item.className.toLowerCase() === "fly");
+      const topPrediction = predictions.reduce((best, item) => item.probability > best.probability ? item : best);
+      const isFlying = topPrediction.className.toLowerCase() === "fly" && fly && fly.probability >= FLY_THRESHOLD;
+      lastPrediction = isFlying ? "fly" : "default";
+      const label = isFlying ? "FLY DETECTED" : "DEFAULT · NO CONTROL";
+
+      predictionLabel.textContent = label;
+      confidenceElement.textContent = `${Math.round(topPrediction.probability * 100)}%`;
+      predictionPanel.classList.toggle("is-fly", isFlying);
+      if (gameState === "running") {
+        messageElement.textContent = isFlying
+          ? "Wingbeat! Keep the pose to flap again."
+          : "Default detected — the bird is gliding.";
+      }
+    }
+
+    async function predictLoop() {
+      if (predictionRunning || !model || !webcam) return;
+      predictionRunning = true;
+      while (webcam) {
+        try {
+          webcam.update();
+          const predictions = await model.predict(webcam.canvas);
+          handlePrediction(predictions);
+          await new Promise((resolve) => setTimeout(resolve, 100));
+        } catch (error) {
+          messageElement.textContent = `Prediction stopped: ${error.message}`;
+          gameState = "error";
+          break;
+        }
+      }
+      predictionRunning = false;
+    }
+
+    async function startCamera() {
+      startButton.disabled = true;
+      startButton.textContent = "Loading model…";
+      messageElement.textContent = "Loading the bird model and requesting camera access…";
+
+      try {
+        if (!window.tmImage) {
+          throw new Error("The Teachable Machine library did not load. Check your internet connection and reload.");
+        }
+        model = await tmImage.load(`${MODEL_URL}model.json`, `${MODEL_URL}metadata.json`);
+        webcam = new tmImage.Webcam(224, 224, true);
+        await webcam.setup();
+        await webcam.play();
+        cameraPreview.replaceChildren(webcam.canvas);
+        resetGame();
+        gameState = "running";
+        messageElement.textContent = "Camera ready. Show Fly to flap; Default has no control.";
+        startButton.textContent = "Restart flight";
+        startButton.disabled = false;
+        predictLoop();
+        if (!animationStarted) {
+          animationStarted = true;
+          requestAnimationFrame(animate);
+        }
+      } catch (error) {
+        webcam = null;
+        startButton.disabled = false;
+        startButton.textContent = "Try camera again";
+        messageElement.textContent = `Could not start: ${error.message}`;
+        predictionLabel.textContent = "MODEL OFFLINE";
+      }
+    }
+
+    function update(delta, now) {
+      if (gameState !== "running") return;
+      const step = Math.min(delta / 16.67, 2.2);
+      if (lastPrediction === "fly" && now - lastFlap >= FLAP_INTERVAL) flap(now);
+
+      bird.velocity += 0.24 * step;
+      bird.y += bird.velocity * step;
+
+      for (const pipe of pipes) {
+        pipe.x -= 2.65 * step;
+        if (!pipe.scored && pipe.x + 56 < bird.x) {
+          pipe.scored = true;
+          score += 1;
+          scoreElement.textContent = String(score);
+        }
+        const overlapsBird = bird.x + bird.radius > pipe.x && bird.x - bird.radius < pipe.x + 56;
+        const missesGap = bird.y - bird.radius < pipe.gapY - pipe.gap / 2 || bird.y + bird.radius > pipe.gapY + pipe.gap / 2;
+        if (overlapsBird && missesGap) endGame();
+      }
+
+      if (pipes.length && pipes[0].x < -70) pipes.shift();
+      if (!pipes.length || pipes[pipes.length - 1].x < width - 330) addPipe(width + 30);
+
+      for (const seed of seeds) {
+        seed.x -= 2.65 * step;
+        seed.phase += 0.08 * step;
+        if (!seed.collected && Math.hypot(seed.x - bird.x, seed.y - bird.y) < bird.radius + 12) {
+          seed.collected = true;
+          score += 1;
+          scoreElement.textContent = String(score);
+        }
+      }
+      seeds = seeds.filter((seed) => !seed.collected && seed.x > -20);
+
+      if (bird.y - bird.radius <= 0 || bird.y + bird.radius >= groundY) endGame();
+    }
+
+    function endGame() {
+      if (gameState !== "running") return;
+      gameState = "over";
+      messageElement.textContent = `Flight over — ${score} seed${score === 1 ? "" : "s"} collected. Restart when ready.`;
+      startButton.textContent = "Fly again";
+    }
+
+    function drawBackground() {
+      const sky = ctx.createLinearGradient(0, 0, 0, height);
+      sky.addColorStop(0, "#a9ded9");
+      sky.addColorStop(1, "#e5f1d4");
+      ctx.fillStyle = sky;
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.fillStyle = "rgba(255, 250, 220, 0.85)";
+      ctx.beginPath();
+      ctx.arc(735, 98, 36, 0, Math.PI * 2);
+      ctx.fill();
+
+      drawCloud(145, 105, 0.9);
+      drawCloud(520, 195, 0.62);
+      ctx.fillStyle = "#b5d8a8";
+      ctx.beginPath();
+      ctx.moveTo(0, 370);
+      ctx.quadraticCurveTo(180, 285, 365, 370);
+      ctx.quadraticCurveTo(590, 290, 900, 370);
+      ctx.lineTo(900, groundY);
+      ctx.lineTo(0, groundY);
+      ctx.fill();
+    }
+
+    function drawCloud(x, y, scale) {
+      ctx.fillStyle = "rgba(255, 255, 245, 0.66)";
+      ctx.beginPath();
+      ctx.arc(x, y, 23 * scale, 0, Math.PI * 2);
+      ctx.arc(x + 27 * scale, y - 10 * scale, 30 * scale, 0, Math.PI * 2);
+      ctx.arc(x + 59 * scale, y, 21 * scale, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function drawBranch(pipe) {
+      const topEnd = pipe.gapY - pipe.gap / 2;
+      const bottomStart = pipe.gapY + pipe.gap / 2;
+      drawBranchSegment(pipe.x, 0, 56, topEnd, false);
+      drawBranchSegment(pipe.x, bottomStart, 56, groundY - bottomStart, true);
+    }
+
+    function drawBranchSegment(x, y, branchWidth, segmentHeight, downward) {
+      const colors = ["#397e58", "#478b60", "#5a9b69"];
+      ctx.fillStyle = colors[1];
+      ctx.fillRect(x, y, branchWidth, segmentHeight);
+      ctx.fillStyle = colors[0];
+      ctx.fillRect(x, y, 8, segmentHeight);
+      ctx.fillStyle = colors[2];
+      ctx.fillRect(x + branchWidth - 8, y, 8, segmentHeight);
+
+      const leafCount = Math.max(0, Math.floor(segmentHeight / 55));
+      for (let i = 0; i < leafCount; i += 1) {
+        const leafY = y + 28 + i * 55;
+        const direction = i % 2 === 0 ? -1 : 1;
+        const stemY = downward ? leafY : Math.min(y + segmentHeight - 8, leafY);
+        ctx.strokeStyle = "#397e58";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(x + 27, stemY);
+        ctx.lineTo(x + 27 + direction * 13, stemY + (downward ? 10 : -10));
+        ctx.stroke();
+        drawLeaf(x + 27 + direction * 15, stemY + (downward ? 11 : -11), direction);
+      }
+    }
+
+    function drawLeaf(x, y, direction) {
+      ctx.fillStyle = "#83b96c";
+      ctx.beginPath();
+      ctx.ellipse(x + direction * 5, y, 11, 5, direction * -0.45, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function drawSeed(seed) {
+      const bob = Math.sin(seed.phase) * 4;
+      ctx.fillStyle = "#edaa4b";
+      ctx.beginPath();
+      ctx.ellipse(seed.x, seed.y + bob, 8, 11, -0.55, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#ffe09a";
+      ctx.beginPath();
+      ctx.arc(seed.x - 2, seed.y + bob - 3, 2.3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function drawBird(now) {
+      const wingBeat = gameState === "running" && lastPrediction === "fly" && now - lastFlap < 190;
+      ctx.save();
+      ctx.translate(bird.x, bird.y);
+      ctx.rotate(Math.max(-0.35, Math.min(0.5, bird.velocity * 0.055)));
+
+      ctx.fillStyle = "#ef9a56";
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 22, 16, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = "#d87543";
+      ctx.beginPath();
+      ctx.ellipse(-5, wingBeat ? -13 : 7, 12, 6, wingBeat ? -0.55 : 0.35, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = "#fff8df";
+      ctx.beginPath();
+      ctx.arc(10, -5, 6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#263f3b";
+      ctx.beginPath();
+      ctx.arc(12, -5, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = "#e88247";
+      ctx.beginPath();
+      ctx.moveTo(19, 1);
+      ctx.lineTo(31, 5);
+      ctx.lineTo(19, 9);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawOverlay(title, subtitle) {
+      ctx.fillStyle = "rgba(30, 75, 65, 0.34)";
+      ctx.fillRect(0, 0, width, height);
+      ctx.textAlign = "center";
+      ctx.fillStyle = "#fffdf2";
+      ctx.font = "500 44px Georgia, serif";
+      ctx.fillText(title, width / 2, height / 2 - 7);
+      ctx.font = "600 15px Trebuchet MS, sans-serif";
+      ctx.fillText(subtitle, width / 2, height / 2 + 25);
+      ctx.textAlign = "start";
+    }
+
+    function draw(now) {
+      drawBackground();
+      for (const pipe of pipes) drawBranch(pipe);
+      for (const seed of seeds) drawSeed(seed);
+      ctx.fillStyle = "#83b96c";
+      ctx.fillRect(0, groundY, width, height - groundY);
+      ctx.fillStyle = "#5e9d68";
+      ctx.fillRect(0, groundY, width, 8);
+      drawBird(now);
+
+      if (gameState === "ready") drawOverlay("A little bird awaits", "Start the camera to take flight");
+      if (gameState === "over") drawOverlay("Time to rest", "Restart to fly again");
+      if (gameState === "error") drawOverlay("Camera paused", "Check the message below");
+    }
+
+    function animate(now) {
+      const delta = lastFrame ? now - lastFrame : 16.67;
+      lastFrame = now;
+      update(delta, now);
+      draw(now);
+      requestAnimationFrame(animate);
+    }
+
+    startButton.addEventListener("click", () => {
+      if (webcam && model) {
+        resetGame();
+        gameState = "running";
+        messageElement.textContent = "Back in the air. Show Fly to flap; Default has no control.";
+      } else {
+        startCamera();
+      }
+    });
+
+    resetGame();
+    draw(0);
+  </script>
+</body>
+</html>
