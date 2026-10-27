@@ -1,4 +1,4 @@
-# Little Bird
+# Handy Bird
 
 A gesture-controlled flying game built with Teachable Machine and TensorFlow.js for **Lab 5: Machine Learning + Biomimicry**.
 
