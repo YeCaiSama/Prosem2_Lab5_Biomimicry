@@ -1,40 +1,95 @@
 # Little Bird
 
-A camera-controlled, Flappy Bird-inspired game using the local Teachable Machine image model in `tm-my-image-model/`.
+A gesture-controlled flying game built with Teachable Machine and TensorFlow.js for **Lab 5: Machine Learning + Biomimicry**.
+
+Little Bird combines the pipe obstacles of Flappy Bird with a relaxed, no-death interaction. Its minimal grayscale pixel art takes inspiration from Chrome’s dinosaur game. Show the model your **Fly** gesture to move forward and gain lift; return to **Default** to stop moving forward and settle onto the ground or a pipe. Take your time—there is no game over.
+
+## How to play
+
+1. Open the website and click **Enable camera**.
+2. Allow camera access and position yourself in the preview.
+3. Show the gesture associated with the model’s **Fly** class to take off and move forward. Hold it for repeated wingbeats.
+4. Return to **Default** to stop horizontal movement and let gravity bring the bird down.
+5. Navigate through the pipe openings. Each fully passed pipe adds one point.
+
+The ground and lower pipe tops are safe places to rest. Colliding with a pipe blocks movement without killing or resetting the bird. The map does not scroll automatically: the view follows the bird only after it moves far enough across the screen.
+
+Gestures are the only movement controls. **Reset** starts a fresh map and clears the score. **Turn off camera** stops recognition without resetting your progress.
 
 ## Run locally
 
-1. Open this folder in VS Code and install the Live Server extension if needed.
-2. Right-click `index.html` and choose **Open with Live Server** (or select **Go Live**).
-3. Use the `http://localhost:...` address, then select **Enable camera** and allow camera access.
+No build step or package installation is needed.
 
-The TensorFlow.js and Teachable Machine libraries load from jsDelivr, so an internet connection is required. The model files are included locally. Camera access is restricted by browsers to localhost or HTTPS.
+### With VS Code
 
-## Interaction
+1. Open this project folder in VS Code.
+2. Install the **Live Server** extension if needed.
+3. Right-click `index.html` and select **Open with Live Server**.
+4. Open the localhost address shown by Live Server.
 
-- **Fly** provides repeated wingbeats and moves the bird forward while recognized; **Default** stops horizontal movement and lets the bird descend. Gestures are the only game controls.
-- Land on the ground or a lower pipe to rest. The world stays fixed; the camera follows only when the bird moves past 38% of the screen width. It stops immediately when forward movement stops. Pipes are solid: a side collision holds your position while you fly into the opening. There is no death, teleport, or automatic restart.
-- Pass a pipe to score. **Reset** starts a fresh map; enabling/disabling the camera preserves your game.
-- The right panel displays the mirrored camera, both class probabilities, and the active control class. Recognition uses smoothing, a 62% entry threshold, a 42% hold threshold, and 220 ms of tolerance for brief dropouts. Stale predictions stop controlling the bird after 600 ms.
-- The game uses a fixed physics step, a camera that follows the bird, and generous pipe gaps. On narrow screens the camera panel moves below the game.
+### With Python 3
 
-The minimal grayscale pixel art is drawn directly on canvas. Wingbeats provide lift; gravity brings the bird back to a safe resting surface. Camera frames are processed in the browser.
-
-## Quick check
-
-Enable the camera and show Fly to take off and advance. Switch to Default while airborne: horizontal movement and the camera should stop while the bird lands. Show Fly again to continue. Keyboard, mouse, and touch do not move the bird. Fly into a pipe side, then climb into its opening; land on a lower pipe and take off again. The score only increases once per passed pipe. Check the Fly and Default bars with your actual poses, and use **Turn off camera** to release the camera.
-
-## Publish to GitHub
-
-Create a GitHub repository, then connect this folder to it and push the `main` branch:
+From the project folder, run:
 
 ```sh
-git init
-git add index.html README.md tm-my-image-model
-git commit -m "Create camera-controlled Little Bird game"
-git branch -M main
-git remote add origin https://github.com/YOUR-USERNAME/YOUR-REPOSITORY.git
-git push -u origin main
+python3 -m http.server 8765 --bind 127.0.0.1
 ```
 
-Replace the remote URL with the repository you create. The model weights are included in this project, so no hosted model URL is needed.
+Then open [Little Bird locally](http://127.0.0.1:8765/).
+
+Use a browser with webcam support and allow camera access. Serve the project through localhost or HTTPS rather than opening the HTML file directly. An internet connection is needed to load the TensorFlow.js and Teachable Machine libraries from jsDelivr; the trained model is included in this repository.
+
+## Machine learning interaction
+
+The included Teachable Machine image model recognizes two classes:
+
+| Class | Game response |
+| --- | --- |
+| `Fly` | Repeated wingbeats and forward movement |
+| `Default` | No forward movement; gravity brings the bird down |
+
+The left panel contains the game. The right panel shows the mirrored webcam preview, both class confidence values, and the active control class. On smaller screens, the camera panel appears below the game.
+
+To accommodate imperfect recognition, the game smooths Fly predictions, uses a 62% threshold to activate and a 42% threshold to sustain the gesture, and allows 220 ms of tolerance for brief recognition dropouts. Predictions older than 600 ms cannot control the bird. These settings are defined in `index.html`.
+
+Camera frames are processed locally in the browser by the model. The application does not record or upload them.
+
+## Biomimicry and feedback
+
+The interaction borrows from bird flight: wingbeats provide lift, while gravity brings the bird down between wingbeats. A recognized Fly gesture becomes a virtual wingbeat. This is a simplified interaction inspired by flight rather than a physical simulation.
+
+The feedback loop is:
+
+```text
+Player gesture → Webcam → Model prediction → Bird movement
+      ↑                                           ↓
+      └──── Player watches and adjusts gesture ────┘
+```
+
+The confidence bars help the player understand what the model sees. Safe landings allow the player to pause, adjust their position, and try again without losing progress.
+
+## Project files
+
+```text
+index.html                         Page, pixel art, game logic, and model integration
+tm-my-image-model/
+  model.json                      Exported model architecture
+  weights.bin                     Trained model weights
+  metadata.json                   Class labels and model metadata
+README.md                          Project description and setup
+lab-5-machine-learning-and-biomimicry.md
+                                   Assignment instructions
+```
+
+## Deployment
+
+Deploy this folder as a static website. Keep `tm-my-image-model/` alongside `index.html` so the relative model paths continue to work. Enable HTTPS on the public site for camera access.
+
+For the lab’s Dokploy workflow, select the **Static** build type and use the directory containing `index.html` as the site root.
+
+## Troubleshooting
+
+- **Camera blocked:** allow camera access in your browser’s site settings, then retry.
+- **Camera unavailable:** connect a webcam and close other applications using it.
+- **Model fails to load:** check your internet connection and confirm all three model files are present.
+- **Gesture does not trigger reliably:** check the preview and confidence bars, improve lighting, and match the gesture used to train the Fly class. Recognition depends on the model’s training examples.
